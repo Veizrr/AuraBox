@@ -9,6 +9,20 @@ getgenv().SelectedHitboxColor = Color3.fromRGB(128, 0, 128)
 getgenv().HitboxTransparency = 0.5
 local Connections = {}
 
+-- pcall to avoid the script breaking on low level executors (e.g. Solara or any Xeno paste)
+pcall(function()
+    local mt = getrawmetatable(game)
+    setreadonly(mt, false)
+    local old = mt.__index
+    mt.__index = function(Self, Key)
+        if tostring(Self) == "HumanoidRootPart" and tostring(Key) == "Size" then
+            return Vector3.new(2,2,1)
+        end
+        return old(Self, Key)
+    end
+    setreadonly(mt, true)
+end)
+
 -- UI Window
 local Window = Rayfield:CreateWindow({
     Name = "AuraBox",
@@ -172,3 +186,78 @@ Players.PlayerRemoving:Connect(function(player)
         Connections[player] = nil
     end
 end)
+
+-- Teleport Walk Feature
+local RunService = game:GetService("RunService")
+local tpwalking = false
+local tpwalkConnection
+getgenv().TPWalkSpeed = 1
+
+-- Toggle: Enable Teleport Walk
+Tab:CreateToggle({
+    Name = "Teleport Walk",
+    CurrentValue = false,
+    Callback = function(Value)
+        tpwalking = Value
+        local chr = LocalPlayer.Character
+        local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+        
+        if Value and chr and hum then
+            if tpwalkConnection then tpwalkConnection:Disconnect() end
+            tpwalkConnection = RunService.Heartbeat:Connect(function(delta)
+                if tpwalking and hum.MoveDirection.Magnitude > 0 then
+                    chr:TranslateBy(hum.MoveDirection * getgenv().TPWalkSpeed * delta * 10)
+                end
+            end)
+        else
+            if tpwalkConnection then
+                tpwalkConnection:Disconnect()
+                tpwalkConnection = nil
+            end
+        end
+    end
+})
+
+-- Keybind: Toggle Teleport Walk
+Tab:CreateKeybind({
+    Name = "Teleport Walk Keybind",
+    CurrentKeybind = "T",
+    HoldToInteract = false,
+    Callback = function()
+        tpwalking = not tpwalking
+        Rayfield:Notify({
+            Title = "AuraBox",
+            Content = "Teleport Walk " .. (tpwalking and "Enabled" or "Disabled"),
+            Duration = 3
+        })
+
+        local chr = LocalPlayer.Character
+        local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+
+        if tpwalking and chr and hum then
+            if tpwalkConnection then tpwalkConnection:Disconnect() end
+            tpwalkConnection = RunService.Heartbeat:Connect(function(delta)
+                if tpwalking and hum.MoveDirection.Magnitude > 0 then
+                    chr:TranslateBy(hum.MoveDirection * getgenv().TPWalkSpeed * delta * 10)
+                end
+            end)
+        else
+            if tpwalkConnection then
+                tpwalkConnection:Disconnect()
+                tpwalkConnection = nil
+            end
+        end
+    end
+})
+
+-- Slider: Teleport Walk Speed
+Tab:CreateSlider({
+    Name = "Teleport Walk Speed",
+    Range = {0.2, 1},
+    Increment = 0.1,
+    Suffix = "x",
+    CurrentValue = getgenv().TPWalkSpeed,
+    Callback = function(Value)
+        getgenv().TPWalkSpeed = Value
+    end
+})
