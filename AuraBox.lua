@@ -6,7 +6,7 @@ if not Rayfield then return end
 getgenv().HBE = false
 getgenv().HitboxSizeValue = 5
 getgenv().SelectedHitboxColor = Color3.fromRGB(128, 0, 128)
-getgenv().HitboxTransparency = 0.2
+getgenv().HitboxTransparency = 0.5
 local Connections = {}
 
 -- UI Window
@@ -14,6 +14,7 @@ local Window = Rayfield:CreateWindow({
     Name = "AuraBox",
     LoadingTitle = "AuraBox",
     LoadingSubtitle = "by Z",
+    Theme = "Amethyst",
     ConfigurationSaving = { Enabled = false }
 })
 
