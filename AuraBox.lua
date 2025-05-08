@@ -23,7 +23,7 @@ local Tab = Window:CreateTab("Main", 4483362458)
 
 -- Toggle: Enable/Disable Hitboxes
 Tab:CreateToggle({
-    Name = "Enable Hitboxes",
+    Name = "Enable Hitbox",
     CurrentValue = false,
     Callback = function(Value)
         getgenv().HBE = Value
@@ -44,7 +44,7 @@ Tab:CreateToggle({
 -- Keybind: Toggle Hitboxes
 Tab:CreateKeybind({
     Name = "Toggle Hitboxes Keybind",
-    CurrentKeybind = "RightShift",
+    CurrentKeybind = "H",
     HoldToInteract = false,
     Callback = function()
         getgenv().HBE = not getgenv().HBE
